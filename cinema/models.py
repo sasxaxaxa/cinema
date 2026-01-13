@@ -48,7 +48,7 @@ class Hall(models.Model):
 
     cinema = models.ForeignKey(Cinema, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    hall_type = models.CharField(max_length=50, choises=HALL_TYPES, default='standard')
+    hall_type = models.CharField(max_length=50, choices=HALL_TYPES, default='standard')
     total_rows = models.PositiveIntegerField()
     total_seats_per_row = models.PositiveIntegerField()
     schema_image_path = models.CharField(max_length=500, blank=True)
@@ -56,8 +56,8 @@ class Hall(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = ''
-        verbose_name_plural = ''
+        verbose_name = 'Зал'
+        verbose_name_plural = 'Залы'
 
     def __str__(self):
         return f'{self.name} ({self.cinema.name})'
@@ -116,3 +116,128 @@ class Movie(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class MovieGenre(models.Model):
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Жанр фильма'
+        verbose_name_plural = 'Жанры фильма'
+        unique_together = ['movie', 'genre']
+
+
+class MoviePerson(models.Model):
+    ROLES = [
+        ('actor', 'Актер'),
+        ('director', 'Режиссер'),
+        ('producer', 'Продюсер'),
+        ('screenwriter', 'Сценарист'),
+        ('operator', 'Оператор'),
+    ]
+
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
+    role_in_movie = models.CharField(max_length=100, choices=ROLES)
+    character_name = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Персонаж фильма'
+        verbose_name_plural = 'Персонажи фильма'
+        unique_together = ['movie', 'person', 'role_in_movie']
+
+
+class Screening(models.Model):
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    hall = models.ForeignKey(Hall, on_delete=models.CASCADE)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    format = models.CharField(max_length=10, default='2D')
+    language = models.CharField(max_length=50, default='RU')
+    has_subtitles = models.BooleanField(default=False)
+    base_price = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Сеанс'
+        verbose_name_plural = 'Сеансы'
+
+        constraints = [
+            models.UniqueConstraint(fields=['hall', 'start_time'], name='unique_screening_time'),
+        ]
+
+    def __str__(self):
+        return f'{self.movie.title} - {self.start_time}'
+
+
+class Ticket(models.Model):
+    TICKET_TYPES = [
+        ('adult', 'Взрослый'),
+        ('child', 'Детский'),
+        ('student', 'Студенческий'),
+    ]
+
+    STATUSES = [
+        ('booked', 'Забронирован'),
+        ('paid', 'Оплачен'),
+        ('cancelled', 'Отменен'),
+        ('used', 'Использован'),
+    ]
+
+    screening = models.ForeignKey(Screening, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    seat_row = models.PositiveIntegerField()
+    seat_number = models.PositiveIntegerField()
+    final_price = models.DecimalField(max_digits=10, decimal_places=2)
+    ticket_type = models.CharField(max_length=20, choices=TICKET_TYPES, default='adult')
+    status = models.CharField(max_length=20, choices=STATUSES, default='booked')
+    qr_code_path = models.CharField(max_length=500, blank=True)
+    purchased_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Билет'
+        verbose_name_plural = 'Билеты'
+        unique_together = ['screening', 'seat_row', 'seat_number']
+
+    def __str__(self):
+        return f'Билет {self.id}'
+
+
+class Review(models.Model):
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()
+    title = models.CharField(max_length=200)
+    text = models.TextField()
+    is_approved = models.BooleanField(default=False)
+    likes_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Рецензия'
+        verbose_name_plural = 'Рецензии'
+        unique_together = ['movie', 'user']
+
+    def __str__(self):
+        return f'{self.title} - {self.user.email}'
+
+
+class UserFavorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        unique_together = ['user', 'movie']
+
+    def __str__(self):
+        return f'{self.user.email} - {self.movie.title}'
