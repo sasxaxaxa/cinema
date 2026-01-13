@@ -1,3 +1,7 @@
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,4 +42,15 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+STATIC_URL = 'static/'
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+SECRET_KEY = 'django-insecure-change-this-secret-key-for-production'
+DEBUG = True
+ALLOWED_HOSTS = []
