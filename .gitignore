@@ -22,7 +22,6 @@ ENV/
 *.swo
 
 # PyCharm
-.idea/
 .idea/*
 
 # OS
