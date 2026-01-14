@@ -54,3 +54,8 @@ DATABASES = {
 SECRET_KEY = 'django-insecure-change-this-secret-key-for-production'
 DEBUG = True
 ALLOWED_HOSTS = []
+
+ROOT_URLCONF = 'config.urls'
+WSGI_APPLICATION = 'config.wsgi.application'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

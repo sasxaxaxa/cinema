@@ -121,6 +121,7 @@ class Movie(models.Model):
 class MovieGenre(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, verbose_name="Фильм")
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE, verbose_name="Жанр")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     class Meta:
         verbose_name = "Жанр фильма"
