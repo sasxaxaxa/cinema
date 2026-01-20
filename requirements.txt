@@ -1,0 +1,8 @@
+Django==4.2.27
+djangorestframework==3.16.1
+django-filter==25.1
+django-import-export==4.4.0
+django-simple-history==3.10.1
+django-unfold==0.67.0
+Pillow==10.2.0
+requests==2.31.0

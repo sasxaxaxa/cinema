@@ -1,0 +1,18 @@
+[flake8]
+max-line-length = 120
+exclude =
+    .git,
+    __pycache__,
+    migrations,
+    venv,
+    env,
+    .venv,
+    .env,
+    static,
+    media,
+    node_modules
+ignore = E203,E501,W503,F401,F841
+per-file-ignores =
+    __init__.py:F401
+    settings.py:E501
+    manage.py:F401
