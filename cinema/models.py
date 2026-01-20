@@ -1,5 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from simple_history.models import HistoricalRecords
 
@@ -164,12 +168,16 @@ class Screening(models.Model):
     format = models.CharField(max_length=10, default='2D', verbose_name="Формат")
     language = models.CharField(max_length=50, default='RU', verbose_name="Язык")
     has_subtitles = models.BooleanField(default=False, verbose_name="Субтитры")
-    base_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Базовая цена")
+    base_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], verbose_name="Базовая цена")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     history = HistoricalRecords()
+
+    def clean(self):
+        if self.end_time <= self.start_time:
+            raise ValidationError('Время окончания сеанса должно быть позже времени начала')
 
     class Meta:
         verbose_name = "Сеанс"
@@ -201,7 +209,7 @@ class Ticket(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     seat_row = models.PositiveIntegerField(verbose_name="Ряд")
     seat_number = models.PositiveIntegerField(verbose_name="Место")
-    final_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Итоговая цена")
+    final_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], verbose_name="Итоговая цена")
     ticket_type = models.CharField(max_length=20, choices=TICKET_TYPES, default='adult', verbose_name="Тип билета")
     status = models.CharField(max_length=20, choices=STATUSES, default='booked', verbose_name="Статус")
     qr_code_path = models.CharField(max_length=500, blank=True, verbose_name="QR-код")
@@ -224,7 +232,7 @@ class Ticket(models.Model):
 class Review(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, verbose_name="Фильм")
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
-    rating = models.PositiveIntegerField(verbose_name="Рейтинг")
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Рейтинг")
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     text = models.TextField(verbose_name="Текст")
     is_approved = models.BooleanField(default=False, verbose_name="Одобрено")
@@ -257,3 +265,60 @@ class UserFavorite(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.movie.title}'
+
+
+class UserProfile(models.Model):
+    USER_ROLES = [
+        ('user', 'Пользователь'),
+        ('moderator', 'Модератор'),
+        ('admin', 'Администратор'),
+    ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='profile'
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=USER_ROLES,
+        default='user',
+        verbose_name="Роль"
+    )
+    phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="Телефон"
+    )
+    profile_picture = models.CharField(
+        max_length=500,
+        blank=True,
+        verbose_name="Фото профиля"
+    )
+
+    class Meta:
+        verbose_name = "Профиль пользователя"
+        verbose_name_plural = "Профили пользователей"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role}"
+
+    def is_admin(self):
+        return self.role == 'admin' or self.user.is_superuser
+
+    def is_moderator(self):
+        return self.role in ['moderator', 'admin'] or self.user.is_superuser
+
+
+# Сигналы для автоматического создания профиля
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
+
