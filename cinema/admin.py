@@ -86,28 +86,24 @@ class TicketResource(resources.ModelResource):
         return status_map.get(obj.status, obj.status)
 
 
-# 1. HallInline для Cinema (уже есть)
 class HallInline(admin.TabularInline):
     model = Hall
     extra = 0
     readonly_fields = ('created_at', 'updated_at')
 
 
-# 2. MovieGenreInline для Movie (уже есть)
 class MovieGenreInline(admin.TabularInline):
     model = MovieGenre
     extra = 0
     raw_id_fields = ('genre',)
 
 
-# 3. MoviePersonInline для Movie (уже есть)
 class MoviePersonInline(admin.TabularInline):
     model = MoviePerson
     extra = 0
     raw_id_fields = ('person',)
 
 
-# 4. ScreeningInline для Hall (НОВАЯ настройка)
 class ScreeningInline(admin.TabularInline):
     model = Screening
     extra = 0
@@ -115,7 +111,6 @@ class ScreeningInline(admin.TabularInline):
     raw_id_fields = ('movie',)
 
 
-# 5. TicketInline для Screening (НОВАЯ настройка)
 class TicketInline(admin.TabularInline):
     model = Ticket
     extra = 0

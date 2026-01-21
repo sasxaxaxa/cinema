@@ -42,7 +42,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         """
         1. Фильтр по текущему аутентифицированному пользователю - автоматически в get_queryset
         2. Фильтр по именованным аргументам в URL - например, ?owner_id=1
-        3. Фильтр по GET параметрам - например, ?name=пицца&min_price=100
+        3. Фильтр по GET параметрам - например, ?name=триллер&min_price=100
         4. DjangoFilterBackend - через filterset_class
         5. SearchFilter - поиск по полям
         """
@@ -197,7 +197,6 @@ class ScreeningViewSet(viewsets.ModelViewSet):
                 start_time__week_day__in=[1, 7]  # Воскресенье=1, Суббота=7
             )
 
-        # Сложные Q запросы
         # Доступные сеансы (не в прошлом И есть свободные места)
         if self.request.query_params.get('available') == 'true':
             queryset = queryset.filter(
@@ -419,7 +418,7 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def my_tickets(self, request):
-        """Получить все билеты текущего пользователя (дублирует get_queryset)"""
+        """Получить все билеты текущего пользователя """
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

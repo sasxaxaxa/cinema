@@ -2,10 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 
-# Создаем роутер для API
 router = DefaultRouter()
 
-# Регистрируем ViewSet'ы
 router.register(r'movies', views.MovieViewSet)
 router.register(r'cinemas', views.CinemaViewSet)
 router.register(r'screenings', views.ScreeningViewSet)

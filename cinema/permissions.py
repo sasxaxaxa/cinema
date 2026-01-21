@@ -44,7 +44,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     Чтение доступно всем.
     """
     def has_permission(self, request, view):
-        # Разрешаем GET, HEAD, OPTIONS для всех
+        # GET, HEAD, OPTIONS для всех
         if request.method in permissions.SAFE_METHODS:
             return True
         
