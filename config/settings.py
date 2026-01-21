@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     'django_filters',
     'simple_history',
     'import_export',
-    'unfold',
 ]
 
 REST_FRAMEWORK = {
