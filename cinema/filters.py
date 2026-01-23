@@ -5,18 +5,88 @@ from .models import Movie, Screening, Ticket, Review
 
 class MovieFilter(django_filters.FilterSet):
     """Фильтр для фильмов"""
-    min_price = django_filters.NumberFilter(field_name='screening__base_price', lookup_expr='gte', distinct=True)
-    max_price = django_filters.NumberFilter(field_name='screening__base_price', lookup_expr='lte', distinct=True)
-    genre = django_filters.CharFilter(field_name='genres__name', lookup_expr='icontains')
-    year = django_filters.NumberFilter(field_name='release_date', lookup_expr='year')
-    age_rating = django_filters.CharFilter(field_name='age_rating', lookup_expr='icontains')
-    min_rating = django_filters.NumberFilter(field_name='imdb_rating', lookup_expr='gte')
-    max_rating = django_filters.NumberFilter(field_name='imdb_rating', lookup_expr='lte')
+
+    min_price = django_filters.NumberFilter(
+        field_name='screening__base_price',
+        lookup_expr='gte',
+        distinct=True,
+        label='Минимальная цена сеанса'
+    )
+
+    max_price = django_filters.NumberFilter(
+        field_name='screening__base_price',
+        lookup_expr='lte',
+        distinct=True,
+        label='Максимальная цена сеанса'
+    )
+
+    genre = django_filters.CharFilter(
+        field_name='genres__name',
+        lookup_expr='icontains',
+        label='Жанры (название содержит)'
+    )
+
+    year = django_filters.NumberFilter(
+        field_name='release_date',
+        lookup_expr='year',
+        label='Год выпуска'
+    )
+
+    age_rating = django_filters.CharFilter(
+        field_name='age_rating',
+        lookup_expr='icontains',
+        label='Возрастной рейтинг содержит'
+    )
+
+    min_rating = django_filters.NumberFilter(
+        field_name='imdb_rating',
+        lookup_expr='gte',
+        label='Рейтинг IMDb (от)'
+    )
+
+    max_rating = django_filters.NumberFilter(
+        field_name='imdb_rating',
+        lookup_expr='lte',
+        label='Рейтинг IMDb (до)'
+    )
+
+    duration_minutes_gte = django_filters.NumberFilter(
+        field_name='duration_minutes',
+        lookup_expr='gte',
+        label='Минимальная длительность (мин)'
+    )
+
+    duration_minutes_lte = django_filters.NumberFilter(
+        field_name='duration_minutes',
+        lookup_expr='lte',
+        label='Максимальная длительность (мин)'
+    )
+
+    kinopoisk_rating_gte = django_filters.NumberFilter(
+        field_name='kinopoisk_rating',
+        lookup_expr='gte',
+        label='Рейтинг Кинопоиска (от)'
+    )
+
+    kinopoisk_rating_lte = django_filters.NumberFilter(
+        field_name='kinopoisk_rating',
+        lookup_expr='lte',
+        label='Рейтинг Кинопоиска (до)'
+    )
+
+    title = django_filters.CharFilter(
+        lookup_expr='icontains',
+        label='Название содержит'
+    )
+
+    country = django_filters.CharFilter(
+        lookup_expr='icontains',
+        label='Страна содержит'
+    )
 
     class Meta:
         model = Movie
-        fields = ['title', 'country', 'age_rating', 'is_active']
-
+        fields = ['is_active']
 
 class ScreeningFilter(django_filters.FilterSet):
     """Фильтр для сеансов"""
